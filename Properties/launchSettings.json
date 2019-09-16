@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "mknx": {
+      "commandName": "Project",
+      "commandLineArgs": "make -f test.xml -o test.knxprod"
+    }
+  }
+}
