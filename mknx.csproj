@@ -19,8 +19,14 @@
   
   <ItemGroup>
     <None Remove="knx_master.xml" />
+    <None Remove="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\knxprod\knxprod.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README.md">
+      <IncludeInPackage>true</IncludeInPackage>
+    </Content>
   </ItemGroup>
 </Project>

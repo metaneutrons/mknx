@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>help</StartArguments>
+    <StartWorkingDirectory>.</StartWorkingDirectory>
+    <ExternalConsole>true</ExternalConsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'mknx init' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>init -f -o test.xml --SetAppName=TestApp --SetMediumType=MT-5 --AddParameterType="Sekunde,Float" "Text,TEXT" --AddParameter="Lampe,Sekunde,Abschaltzeit,255" --AddComObject="Switch_A,Kanal A,Schalte Kanal A,RWC,low"</StartArguments>
+    <StartWorkingDirectory>.</StartWorkingDirectory>
+    <ExternalConsole>true</ExternalConsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'mknx make' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>make -f -i test.xml -o test.knxprod</StartArguments>
+    <StartWorkingDirectory>.</StartWorkingDirectory>
+    <ExternalConsole>true</ExternalConsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'mknx edit' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>init -f -i test.xml -o test.xml --SetAppName=TestApp --SetMediumType=MT-5 --AddParameterType="Sekunde,Float" "Text,TEXT" --AddParameter="Lampe,Sekunde,Abschaltzeit,255" --AddComObject="Switch_A,Kanal A,Schalte Kanal A,RWC,low" --RemoveComObject="Switch_A"</StartArguments>
+    <StartWorkingDirectory>.</StartWorkingDirectory>
+    <ExternalConsole>true</ExternalConsole>
+  </PropertyGroup>
+</Project>
