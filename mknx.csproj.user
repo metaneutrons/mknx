@@ -20,7 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'mknx edit' ">
     <StartAction>Project</StartAction>
-    <StartArguments>init -f -i test.xml -o test.xml --SetAppName=TestApp --SetMediumType=MT-5 --AddParameterType="Sekunde,Float" "Text,TEXT" --AddParameter="Lampe,Sekunde,Abschaltzeit,255" --AddComObject="Switch_A,Kanal A,Schalte Kanal A,RWC,low" --RemoveComObject="Switch_A"</StartArguments>
+    <StartArguments>edit -f -i test.xml -o test.xml --SetAppName=TestApp --SetMediumType=MT-5 --AddParameterType="Sekunde2,Float" --RemoveParameterType="Sekunde2"</StartArguments>
     <StartWorkingDirectory>.</StartWorkingDirectory>
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>

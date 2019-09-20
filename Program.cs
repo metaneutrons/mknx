@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using CommandLine;
 using KnxProd;
 using KnxProd.Model;
@@ -65,7 +66,7 @@ namespace mknx
             public string HardwareName { get; set; }
             [Option('s', "SetHardwareSerial", Required = false, HelpText = "set KNX hardware serial", MetaValue = "STRING")]
             public string HardwareSerial { get; set; }
-            [Option('m', "SetMediumType", Required = false, HelpText = "set KNX medium type", MetaValue = "STRING")]
+            [Option('m', "SetMediumType", Required = false, HelpText = "set KNX medium type", MetaValue = "MT-0,MT-1,MT-5")]
             public string MediumType { get; set; }
             [Option('#', "SetOrderNumber", Required = false, HelpText = "set KNX order number", MetaValue = "STRING")]
             public string OrderNumber { get; set; }
@@ -74,17 +75,17 @@ namespace mknx
             [Option('r', "ReplaceVersions", Required = false, HelpText = "set KNX replaced Versions", MetaValue = "STRING")]
             public string ReplacedVersions { get; set; }
 
-            [Option('t', "AddParameterType", Required = false, HelpText = "add KNX parameter type", MetaValue = "\"Name,Type\", \"...")]
+            [Option('t', "AddParameterType", Required = false, HelpText = "add KNX parameter type", MetaValue = "\"Name, Type\", \"...")]
             public IEnumerable<string> AddParameterTypes { get; set; }
             [Option('T', "RemoveParameterType", Required = false, HelpText = "remove KNX parameter type", MetaValue = "Name")]
             public IEnumerable<string> RemoveParameterTypes { get; set; }
 
-            [Option('p', "AddParameter", Required = false, HelpText = "add KNX parameter", MetaValue = "Name,Type,Text,Value")]
+            [Option('p', "AddParameter", Required = false, HelpText = "add KNX parameter", MetaValue = "Name, Type, Text, Value")]
             public IEnumerable<string> AddParameter { get; set; }
             [Option('P', "RemoveParameter", Required = false, HelpText = "remove KNX parameter", MetaValue = "Name")]
             public IEnumerable<string> RemoveParameter { get; set; }
 
-            [Option('c', "AddComObject", Required = false, HelpText = "add KNX communication object", MetaValue = "Name, Text,FunctionText,Flags = RWCTUI, Priority = alert,hight,low")]
+            [Option('c', "AddComObject", Required = false, HelpText = "add KNX communication object", MetaValue = "Name, Text, FunctionText, Flags = RWCTUI, Priority = alert,hight,low")]
             public IEnumerable<string> AddComObject { get; set; }
             [Option('C', "RemoveComObject", Required = false, HelpText = "remove KNX communication object", MetaValue = "Name")]
             public IEnumerable<string> RemoveComObject { get; set; }
@@ -97,7 +98,7 @@ namespace mknx
             new public string FilenameInput { get; set; }
             [Option('n', "SetAppName", Default = "Test Application", Required = true, HelpText = "set KNX application name", MetaValue = "STRING")]
             new public string ApplicationName { get; set; }
-            [Option('m', "SetMediumType", Default = "MT-5", Required = false, HelpText = "set KNX medium type", MetaValue = "MT-0,MT1,MT-5")]
+            [Option('m', "SetMediumType", Default = "MT-5", Required = false, HelpText = "set KNX medium type", MetaValue = "MT-0,MT-1,MT-5")]
             new public string MediumType { get; set; }
         }
 
@@ -117,6 +118,8 @@ namespace mknx
 
         static int Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             return CommandLine.Parser.Default.ParseArguments<InitOptions, EditOptions, MakeOptions>(args)
               .MapResult(
                 (InitOptions opts) => RunInitAndReturnExitCode(opts),
@@ -279,23 +282,23 @@ namespace mknx
 
         static private int RunInitAndReturnExitCode( InitOptions opts )
         {
-            int retval = 0;
-
             k.FilenameXML = opts.FilenameOutput;
             k.New();
 
-            k.ApplicationName = opts.ApplicationName;
-            k.ApplicationNumber = opts.ApplicationNumber;
-            k.HardwareName = opts.HardwareName;
-            k.HardwareSerial = opts.HardwareSerial;
-            k.MediumType = opts.MediumType;
-            k.OrderNumber = opts.OrderNumber;
-            k.ProductName = opts.ProductName;
-            k.ReplacedVersions = opts.ReplacedVersions;
+            // Modify Fields
+
+            if (opts.ApplicationName != null) k.ApplicationName = opts.ApplicationName;
+            if (opts.ApplicationNumber != null) k.ApplicationNumber = opts.ApplicationNumber;
+            if (opts.HardwareName != null) k.HardwareName = opts.HardwareName;
+            if (opts.HardwareSerial != null) k.HardwareSerial = opts.HardwareSerial;
+            if (opts.MediumType != null) k.MediumType = opts.MediumType;
+            if (opts.OrderNumber != null) k.OrderNumber = opts.OrderNumber;
+            if (opts.ProductName != null) k.ProductName = opts.ProductName;
+            if (opts.ReplacedVersions != null) k.ReplacedVersions = opts.ReplacedVersions;
 
             // Modify Model
 
-            retval = ModifyModel(opts);
+            int retval = ModifyModel(opts);
             if (retval > 0) return retval;
 
             // Write
@@ -321,7 +324,30 @@ namespace mknx
 
         static private int RunEditAndReturnExitCode( EditOptions opts )
         {
-            if(opts.ApplicationName != null) k.ApplicationName = opts.ApplicationName;
+            // Load
+
+            if (!File.Exists(opts.FilenameInput))
+            {
+                Console.WriteLine("Error: Can't find '" + opts.FilenameInput + "'.");
+                return 1;
+            }
+
+            k.FilenameXML = opts.FilenameInput;
+
+            try
+            {
+                Console.WriteLine("Loading " + opts.FilenameInput);
+                k.Load();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return 1;
+            }
+
+            // Modify Fields
+
+            if (opts.ApplicationName != null) k.ApplicationName = opts.ApplicationName;
             if (opts.ApplicationNumber != null) k.ApplicationNumber = opts.ApplicationNumber;
             if (opts.HardwareName != null) k.HardwareName = opts.HardwareName;
             if (opts.HardwareSerial != null) k.HardwareSerial = opts.HardwareSerial;
@@ -330,9 +356,30 @@ namespace mknx
             if (opts.ProductName != null) k.ProductName = opts.ProductName;
             if (opts.ReplacedVersions != null) k.ReplacedVersions = opts.ReplacedVersions;
 
-            ModifyModel( opts );
+            // Modify Model
 
-            return 0;
+            int retval = ModifyModel(opts);
+            if (retval > 0) return retval;
+
+            // Write
+
+            if (File.Exists(opts.FilenameOutput) && opts.Force == false)
+            {
+                Console.WriteLine("Error: file '" + opts.FilenameOutput + "' already exists. Use --force to overwrite.");
+                return 1;
+            }
+
+            try
+            {
+                Console.WriteLine("Writing " + opts.FilenameOutput);
+                k.Save();
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return 1;
+            }
         }
 
         static private int RunMakeAndReturnExitCode( MakeOptions opts )
