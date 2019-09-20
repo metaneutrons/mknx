@@ -2,4 +2,5 @@ bin
 obj
 knx_master.xml
 test.xml
+test.knxprod
 .DS_Store
